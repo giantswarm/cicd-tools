@@ -65,8 +65,8 @@ GITHUB_TOKEN=$(curl \
 #-------------------------
 
 set +e
-kubectl delete secret -n -ci generic tinkerers-ci-github-token 
+kubectl delete secret -n tekton-pipelines generic tinkerers-ci-github-token 
 set -e
 
-kubectl create secret -n -ci generic tinkerers-ci-github-token \
+kubectl create secret -n tekton-pipelines generic tinkerers-ci-github-token \
   --from-literal=GITHUB_TOKEN="${GITHUB_TOKEN}"
