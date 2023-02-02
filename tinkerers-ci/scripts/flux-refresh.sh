@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
-source .utils
-
 set -e
+
+END_CHARS="\e[0m\n"
+tput colors &>/dev/null
+if [ $? -eq 0 ]; then
+    bold() {
+      printf "\e[1m$@${END_CHARS}"
 
 VERBOSE=""
 TARGET_RESOURCE="all"
