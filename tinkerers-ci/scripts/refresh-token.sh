@@ -68,5 +68,5 @@ set +e
 kubectl delete secret -n tekton-pipelines tinkerers-ci-github-token 
 set -e
 
-kubectl create secret -n tekton-pipelines tinkerers-ci-github-token \
+kubectl -n tekton-pipelines create secret generic tinkerers-ci-github-token \
   --from-literal=GITHUB_TOKEN="${GITHUB_TOKEN}"
