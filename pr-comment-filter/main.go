@@ -7,10 +7,14 @@ import (
 	"regexp"
 	"strings"
 
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	tknclient "github.com/tektoncd/pipeline/pkg/client/clientset/versioned"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kubeclient "knative.dev/pkg/client/injection/kube/client"
 
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
@@ -24,6 +28,9 @@ var (
 	// /run test-cluster-create PREVIOUS_VERSION=1.2.6
 	// /run test-cluster-upgrade PRIVATE_NETWORK=false PREVIOUS_VERSION=1.2.6
 	triggerFormat = regexp.MustCompile(`(?mi)^\/run (?P<pipeline>\S+) ?(?P<args>(?:[A-Z_]+=\S+ ?)*)[\n|$]`)
+
+	tektonClient *tknclient.Clientset
+	kubeClient   kubernetes.Interface
 )
 
 type Trigger struct {
@@ -54,20 +61,22 @@ func init() {
 		"COMMENT_ID":       os.Getenv("COMMENT_ID"),
 		"COMMENT_URL":      os.Getenv("COMMENT_URL"),
 	}
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err)
+	}
+	tektonClient, err = tknclient.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	kubeClient = kubeclient.Get(context.Background())
 }
 
 func main() {
 	fmt.Printf("Filtering PR comments for valid triggers. Repo = %s, PR = %s\n", env["REPO_NAME"], env["NUMBER"])
 
 	ctx := context.Background()
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		panic(err)
-	}
-	client, err := tknclient.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
 
 	triggerMatches := triggerFormat.FindAllStringSubmatch(comment, -1)
 	for _, match := range triggerMatches {
@@ -77,6 +86,23 @@ func main() {
 		if val, ok := trigger.Args["NAMESPACE"]; ok && val != "" {
 			namespace = trigger.Args["NAMESPACE"]
 		}
+
+		// Check if we can find the pipeline in the cluster
+		pipeline, err := getPipeline(ctx, trigger.PipelineName, namespace)
+		if err != nil {
+			fmt.Printf("Failed to find pipeline '%s', skipping\n", trigger.PipelineName)
+			continue
+		}
+		namespace = pipeline.ObjectMeta.Namespace
+
+		// Check if we can find an appropriately named ServiceAccount or fallback to using `default`
+		serviceAccountName := trigger.PipelineName
+		serviceAccount, err := getServiceAccount(ctx, serviceAccountName, namespace)
+		if err != nil {
+			fmt.Printf("Failed to find ServiceAccount, skipping\n")
+			continue
+		}
+		serviceAccountName = serviceAccount.ObjectMeta.Name
 
 		pipelineRun := &tkn.PipelineRun{
 			ObjectMeta: v1.ObjectMeta{
@@ -96,8 +122,9 @@ func main() {
 					Name: trigger.PipelineName,
 				},
 				Params: []tkn.Param{},
-				// TODO: We need some way of setting this to something available in the namespace
-				ServiceAccountName: "default",
+				TaskRunTemplate: tkn.PipelineTaskRunTemplate{
+					ServiceAccountName: serviceAccountName,
+				},
 			},
 		}
 
@@ -125,7 +152,7 @@ func main() {
 
 		fmt.Printf("Creating new PipelineRun - %s\n", trigger.PipelineName)
 
-		_, err = client.TektonV1beta1().PipelineRuns(namespace).Create(ctx, pipelineRun, v1.CreateOptions{})
+		_, err = tektonClient.TektonV1().PipelineRuns(namespace).Create(ctx, pipelineRun, v1.CreateOptions{})
 		if err != nil {
 			fmt.Println("Failed to create new PipelineRun: ", err)
 		}
@@ -154,4 +181,26 @@ func parseTriggerLine(triggerLine []string) Trigger {
 	}
 
 	return trigger
+}
+
+func getPipeline(ctx context.Context, pipelineName string, namespace string) (*tkn.Pipeline, error) {
+	pipeline, err := tektonClient.TektonV1().Pipelines(namespace).Get(ctx, pipelineName, v1.GetOptions{})
+	if err != nil && !errors.IsNotFound(err) {
+		return pipeline, err
+	} else if errors.IsNotFound(err) && namespace != "tekton-pipelines" {
+		pipeline, err = getPipeline(ctx, pipelineName, "tekton-pipelines")
+	}
+
+	return pipeline, err
+}
+
+func getServiceAccount(ctx context.Context, serviceAccountName string, namespace string) (*corev1.ServiceAccount, error) {
+	serviceAccount, err := kubeClient.CoreV1().ServiceAccounts(namespace).Get(ctx, serviceAccountName, v1.GetOptions{})
+	if err != nil && !errors.IsNotFound(err) {
+		return serviceAccount, err
+	} else if errors.IsNotFound(err) && serviceAccountName != "default" {
+		serviceAccount, err = getServiceAccount(ctx, "default", namespace)
+	}
+
+	return serviceAccount, err
 }
