@@ -39,7 +39,8 @@ b64enc() { openssl enc -base64 -A | tr '+/' '-_' | tr -d '='; }
 json() { jq -c . | LC_CTYPE=C tr -d '\n'; }
 rs256_sign() { openssl dgst -binary -sha256 -sign <(printf '%s\n' "$1"); }
 
-algo=${1:-RS256}; algo=${algo^^}
+algo=${1:-RS256}; 
+algo=${algo^^} # Convert to uppercase 
 payload=$(build_payload) || return
 signed_content="$(json <<<"$header" | b64enc).$(json <<<"$payload" | b64enc)"
 # shellcheck disable=SC2154
