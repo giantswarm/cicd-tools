@@ -36,7 +36,6 @@ build_payload() {
 }
 
 b64enc() { openssl enc -base64 -A | tr '+/' '-_' | tr -d '='; }
-json() { jq -c . | LC_CTYPE=C tr -d '\n'; }
 rs256_sign() { openssl dgst -binary -sha256 -sign <(printf '%s\n' "$1"); }
 
 algo=${1:-RS256}; 
