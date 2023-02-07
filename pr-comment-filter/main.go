@@ -1,4 +1,4 @@
-package prcommentfilter
+package main
 
 import (
 	"context"
