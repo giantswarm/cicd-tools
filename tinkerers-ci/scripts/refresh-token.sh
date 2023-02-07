@@ -21,11 +21,10 @@ header='{
     "alg": "RS256",
     "typ": "JWT"
 }'
-payload_template='{}'
 
 build_payload() {
         # shellcheck disable=SC2154
-        jq -c \
+        jq -n -j -c \
                 --arg iat_str "$(date +%s)" \
                 --arg app_id "${app_id}" \
         '
@@ -33,7 +32,7 @@ build_payload() {
         | .iat = $iat
         | .exp = ($iat + 300)
         | .iss = ($app_id | tonumber)
-        ' <<< "${payload_template}" | tr -d '\n'
+        '
 }
 
 b64enc() { openssl enc -base64 -A | tr '+/' '-_' | tr -d '='; }
