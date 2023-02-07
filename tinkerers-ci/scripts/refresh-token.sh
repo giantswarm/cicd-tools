@@ -41,7 +41,7 @@ rs256_sign() { openssl dgst -binary -sha256 -sign <(printf '%s\n' "$1"); }
 algo=${1:-RS256}; 
 algo=${algo^^} # Convert to uppercase 
 payload=$(build_payload) || return
-signed_content="$(json <<<"$header" | b64enc).$(json <<<"$payload" | b64enc)"
+signed_content="$(jq -c -j -n "$header" | b64enc).$(jq -c -j -n "$payload" | b64enc)"
 # shellcheck disable=SC2154
 sig=$(printf %s "$signed_content" | rs256_sign "$app_private_key" | b64enc)
 generated_jwt=$(printf '%s.%s\n' "${signed_content}" "${sig}")
