@@ -42,7 +42,8 @@ type Trigger struct {
 func init() {
 	comment := os.Getenv("COMMENT")
 	if comment == "" {
-		panic("The COMMENT environment variable is required")
+		fmt.Println("No comment provided")
+		os.Exit(0)
 	}
 
 	env = map[string]string{
