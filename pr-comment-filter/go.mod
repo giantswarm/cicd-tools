@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	github.com/tektoncd/pipeline v0.44.0
-	k8s.io/api v0.25.4
-	k8s.io/apimachinery v0.25.4
-	k8s.io/client-go v0.25.4
+	k8s.io/api v0.26.1
+	k8s.io/apimachinery v0.26.1
+	k8s.io/client-go v0.26.1
 	knative.dev/pkg v0.0.0-20230207013346-decc1cc0acad
 )
 
