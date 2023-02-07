@@ -14,6 +14,7 @@ import (
 	kubeclient "knative.dev/pkg/client/injection/kube/client"
 
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -126,6 +127,24 @@ func main() {
 				TaskRunTemplate: tkn.PipelineTaskRunTemplate{
 					ServiceAccountName: serviceAccountName,
 				},
+				Workspaces: []tkn.WorkspaceBinding{
+					{
+						Name: "shared",
+						VolumeClaimTemplate: &corev1.PersistentVolumeClaim{
+							Spec: corev1.PersistentVolumeClaimSpec{
+								StorageClassName: stringToPtr("gp3"),
+								AccessModes: []corev1.PersistentVolumeAccessMode{
+									corev1.ReadWriteOnce,
+								},
+								Resources: corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										corev1.ResourceStorage: resource.MustParse("5Gi"),
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		}
 
@@ -204,4 +223,8 @@ func getServiceAccount(ctx context.Context, serviceAccountName string, namespace
 	}
 
 	return serviceAccount, err
+}
+
+func stringToPtr(s string) *string {
+	return &s
 }
