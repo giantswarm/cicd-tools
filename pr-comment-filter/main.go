@@ -12,7 +12,6 @@ import (
 	tknclient "github.com/tektoncd/pipeline/pkg/client/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kubeclient "knative.dev/pkg/client/injection/kube/client"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -23,15 +22,14 @@ import (
 )
 
 var (
-	comment string
-	env     map[string]string
+	env map[string]string
 
 	// Examples:
 	// /run build-and-publish
 	// /run test-cluster-create PRIVATE_NETWORK=true
 	// /run test-cluster-create PREVIOUS_VERSION=1.2.6
 	// /run test-cluster-upgrade PRIVATE_NETWORK=false PREVIOUS_VERSION=1.2.6
-	triggerFormat = regexp.MustCompile(`(?mi)^\/run (?P<pipeline>\S+) ?(?P<args>(?:[A-Z_]+=\S+ ?)*)[\n|$]`)
+	triggerFormat = regexp.MustCompile(`(?mi)^\/run (?P<pipeline>\S+) ?(?P<args>(?:[A-Z_]+=\S+ ?)*)(\n|$)`)
 
 	tektonClient *tknclient.Clientset
 	kubeClient   kubernetes.Interface
@@ -44,8 +42,7 @@ type Trigger struct {
 }
 
 func init() {
-	comment := os.Getenv("COMMENT")
-	if comment == "" {
+	if os.Getenv("COMMENT") == "" {
 		fmt.Println("No comment provided")
 		os.Exit(0)
 	}
@@ -74,7 +71,10 @@ func init() {
 		panic(err)
 	}
 
-	kubeClient = kubeclient.Get(context.Background())
+	kubeClient, err = kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -82,7 +82,7 @@ func main() {
 
 	ctx := context.Background()
 
-	triggerMatches := triggerFormat.FindAllStringSubmatch(comment, -1)
+	triggerMatches := triggerFormat.FindAllStringSubmatch(os.Getenv("COMMENT"), -1)
 
 	// For comments on PRs we don't get all the details of the PR so may need to fetch those from the API
 	if len(triggerMatches) > 0 && env["GIT_REVISION"] == "" {
