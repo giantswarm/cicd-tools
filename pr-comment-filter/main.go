@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
@@ -13,6 +14,8 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubeclient "knative.dev/pkg/client/injection/kube/client"
 
+	"github.com/google/go-github/v50/github"
+	"golang.org/x/oauth2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
@@ -57,7 +60,6 @@ func init() {
 		"REPO_NAME":        os.Getenv("REPO_NAME"),
 		"REPO_ORG":         os.Getenv("REPO_ORG"),
 		"CHANGED_FILES":    os.Getenv("CHANGED_FILES"),
-		"MERGEABLE_STATE":  os.Getenv("MERGEABLE_STATE"),
 		"COMMENT":          os.Getenv("COMMENT"),
 		"PREVIOUS_COMMENT": os.Getenv("PREVIOUS_COMMENT"),
 		"COMMENT_ID":       os.Getenv("COMMENT_ID"),
@@ -81,6 +83,25 @@ func main() {
 	ctx := context.Background()
 
 	triggerMatches := triggerFormat.FindAllStringSubmatch(comment, -1)
+
+	// For comments on PRs we don't get all the details of the PR so may need to fetch those from the API
+	if len(triggerMatches) > 0 && env["GIT_REVISION"] == "" {
+		oClient := oauth2.NewClient(ctx, oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+		))
+		ghClient := github.NewClient(oClient)
+		prNumber, err := strconv.Atoi(env["NUMBER"])
+		if err != nil {
+			panic("Failed to parse PR number to int")
+		}
+		pr, _, err := ghClient.PullRequests.Get(ctx, env["REPO_ORG"], env["REPO_NAME"], prNumber)
+		if err != nil {
+			fmt.Println("Failed to get PR details from GitHub API", err)
+			os.Exit(1)
+		}
+		env["GIT_REVIOSION"] = *pr.Head.SHA
+	}
+
 	for _, match := range triggerMatches {
 		trigger := parseTriggerLine(match)
 
