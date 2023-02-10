@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/tektoncd/pipeline/pkg/apis/pipeline/pod"
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	tknclient "github.com/tektoncd/pipeline/pkg/client/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
@@ -147,6 +148,15 @@ func main() {
 				Params: []tkn.Param{},
 				TaskRunTemplate: tkn.PipelineTaskRunTemplate{
 					ServiceAccountName: serviceAccountName,
+					PodTemplate: &pod.Template{
+						// TODO: Replace this with something more dynamic.
+						// This is currently hardcoded to a pre-existing secret. This will likely break in other namespaces
+						ImagePullSecrets: []corev1.LocalObjectReference{
+							{
+								Name: "regcred",
+							},
+						},
+					},
 				},
 				Workspaces: []tkn.WorkspaceBinding{
 					{
