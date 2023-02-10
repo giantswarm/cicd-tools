@@ -149,11 +149,9 @@ func main() {
 				TaskRunTemplate: tkn.PipelineTaskRunTemplate{
 					ServiceAccountName: serviceAccountName,
 					PodTemplate: &pod.Template{
-						// TODO: Replace this with something more dynamic.
-						// This is currently hardcoded to a pre-existing secret. This will likely break in other namespaces
 						ImagePullSecrets: []corev1.LocalObjectReference{
 							{
-								Name: "regcred",
+								Name: "quay-imagepull-secret",
 							},
 						},
 					},
