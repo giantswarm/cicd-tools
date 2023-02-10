@@ -46,6 +46,14 @@ RUN GH_VERSION=${GH_VERSION:=$(curl -s "https://api.github.com/repos/cli/cli/rel
     curl -fsL -o "/tmp/gh.deb" "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.deb" && \
     dpkg -i /tmp/gh.deb
 
+# Tekton cli
+# repo: tektoncd/cli
+ARG TKN_VERSION=0.29.1
+RUN TKN_VERSION=${TKN_VERSION:=$(curl -s "https://api.github.com/repos/tektoncd/cli/releases/latest" | jq -r '.tag_name | ltrimstr("v")')} &&\
+    curl -fsL -o "/tmp/tkn.deb" "https://github.com/tektoncd/cli/releases/download/v${TKN_VERSION}/tektoncd-cli-${TKN_VERSION}_Linux-64bit.deb" && \
+    dpkg -i /tmp/tkn.deb
+RUN ln -s /usr/bin/tkn /usr/local/bin/kubectl-tkn # Add Tekton CLI as kubectl plugin
+
 RUN mkdir /scripts
 
 COPY scripts /scripts
