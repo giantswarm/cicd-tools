@@ -54,6 +54,14 @@ RUN TKN_VERSION=${TKN_VERSION:=$(curl -s "https://api.github.com/repos/tektoncd/
     dpkg -i /tmp/tkn.deb
 RUN ln -s /usr/bin/tkn /usr/local/bin/kubectl-tkn # Add Tekton CLI as kubectl plugin
 
+# YQ cli
+# repo: mikefarah/yq
+ARG YQ_VERSION=v4.30.8
+RUN YQ_VERSION=${YQ_VERSION:=$(curl -s "https://api.github.com/repos/mikefarah/yq/releases/latest" | jq -r '.tag_name')} &&\
+    curl -fsL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64.tar.gz" | tar xvz  && \
+    mv yq_linux_amd64 /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq
+
 RUN mkdir /scripts
 
 COPY scripts /scripts
