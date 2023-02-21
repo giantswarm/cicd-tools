@@ -162,6 +162,8 @@ github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/go-containerregistry v0.12.1 h1:W1mzdNUTx4Zla4JaixCRLhORcR7G6KxE5hHl5fkPsp8=
 github.com/google/go-containerregistry v0.12.1/go.mod h1:sdIK+oHQO7B93xI8UweYdl887YhuIwg9vz8BSLH3+8k=
+github.com/google/go-containerregistry v0.13.0 h1:y1C7Z3e149OJbOPDBxLYR8ITPz8dTKqQwjErKVHJC8k=
+github.com/google/go-containerregistry v0.13.0/go.mod h1:J9FQ+eSS4a1aC2GNZxvNpbWhgp0487v+cgiilB4FqDo=
 github.com/google/go-github/v50 v50.0.0 h1:gdO1AeuSZZK4iYWwVbjni7zg8PIQhp7QfmPunr016Jk=
 github.com/google/go-github/v50 v50.0.0/go.mod h1:Ev4Tre8QoKiolvbpOSG3FIi4Mlon3S2Nt9W5JYqKiwA=
 github.com/google/go-querystring v1.1.0 h1:AnCroh3fv4ZBgVIf1Iwtovgjaw/GiKJo8M8yD/fhyJ8=
@@ -308,6 +310,8 @@ github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKs
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/tektoncd/pipeline v0.44.0 h1:gTiLCjTDDog3R9sRtQugiIZYqadmq5K6HArrtM1sHkU=
 github.com/tektoncd/pipeline v0.44.0/go.mod h1:z8D9m9nnG2JQGHTpRw/sie9tK37odai/iONmYaY7llA=
+github.com/tektoncd/pipeline v0.45.0 h1:Hv9kyutu5GWGXKtcMrM7PXdAULgeQc0F2HWDNg+jo5c=
+github.com/tektoncd/pipeline v0.45.0/go.mod h1:20Xs6qk3BTpsLHYWEtLNPM44XKqNH5jYwoomXHOGNs8=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
 github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415/go.mod h1:GwrjFmJcFw6At/Gs6z4yjiIwzuJ1/+UwLxMQDVQXShQ=
 github.com/xeipuuv/gojsonschema v1.2.0/go.mod h1:anYRn/JVcOK2ZgGU+IjEV4nwlhoK5sQluxsYJ78Id3Y=
@@ -343,6 +347,8 @@ golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8U
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.5.0 h1:U/0M97KRkSFvyD/3FSmdP5W5swImpNgle/EHFhOsQPE=
 golang.org/x/crypto v0.5.0/go.mod h1:NK/OQwhpMQP3MwtdjgLlYHnH9ebylxKWv3e0fK+mkQU=
+golang.org/x/crypto v0.6.0 h1:qfktjS5LUO+fFKeJXZ+ikTRijMmljikvG68fpMMruSc=
+golang.org/x/crypto v0.6.0/go.mod h1:OFC/31mSvZgRz0V1QTNCzfAI1aIRzbiufJtkMIlEp58=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190510132918-efd6b22b2522/go.mod h1:ZjyILWgesfNpC6sMxTJOJm9Kp84zZh5NQWvqDGG3Qr8=
