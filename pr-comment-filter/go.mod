@@ -6,9 +6,9 @@ require (
 	github.com/google/go-github/v50 v50.1.0
 	github.com/tektoncd/pipeline v0.45.0
 	golang.org/x/oauth2 v0.5.0
-	k8s.io/api v0.25.4
-	k8s.io/apimachinery v0.25.4
-	k8s.io/client-go v0.25.4
+	k8s.io/api v0.26.2
+	k8s.io/apimachinery v0.26.2
+	k8s.io/client-go v0.26.2
 	knative.dev/pkg v0.0.0-20230224190030-645afb2d5dad
 )
 
