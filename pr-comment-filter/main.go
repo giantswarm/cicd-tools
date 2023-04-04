@@ -100,7 +100,7 @@ func main() {
 			fmt.Println("Failed to get PR details from GitHub API", err)
 			os.Exit(1)
 		}
-		env["GIT_REVIOSION"] = *pr.Head.SHA
+		env["GIT_REVISION"] = *pr.Head.SHA
 	}
 
 	for _, match := range triggerMatches {
