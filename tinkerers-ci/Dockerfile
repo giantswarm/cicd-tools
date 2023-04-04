@@ -1,5 +1,5 @@
 # repo: giantswarm/kubectl-gs
-ARG KUBECTL_GS_VERSION=2.34.0
+ARG KUBECTL_GS_VERSION=2.34.1
 # repo: giantswarm/opsctl
 ARG OPSCTL_VERSION=3.3.0
 FROM quay.io/giantswarm/kubectl-gs:${KUBECTL_GS_VERSION} AS kubectl-gs
