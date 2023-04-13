@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/pod"
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
@@ -128,6 +129,16 @@ func main() {
 		}
 		serviceAccountName = serviceAccount.ObjectMeta.Name
 
+		// Support defining a pipeline timeout as an annotation on the Pipeline resource
+		pipelineTimeout, _ := time.ParseDuration("1h")
+		timeoutAnnotation, ok := pipeline.ObjectMeta.Annotations["tekton.dev/pipeline-timeout"]
+		if ok {
+			parsedDuration, err := time.ParseDuration(timeoutAnnotation)
+			if err == nil {
+				pipelineTimeout = parsedDuration
+			}
+		}
+
 		pipelineRun := &tkn.PipelineRun{
 			ObjectMeta: v1.ObjectMeta{
 				GenerateName: fmt.Sprintf("pr-%s-%s-%s", env["REPO_NAME"], env["NUMBER"], trigger.PipelineName),
@@ -144,6 +155,9 @@ func main() {
 			Spec: tkn.PipelineRunSpec{
 				PipelineRef: &tkn.PipelineRef{
 					Name: trigger.PipelineName,
+				},
+				Timeouts: &tkn.TimeoutFields{
+					Pipeline: &v1.Duration{Duration: pipelineTimeout},
 				},
 				Params: []tkn.Param{},
 				TaskRunTemplate: tkn.PipelineTaskRunTemplate{
