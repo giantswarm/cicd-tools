@@ -10,7 +10,7 @@ require (
 	k8s.io/api v0.25.4
 	k8s.io/apimachinery v0.25.4
 	k8s.io/client-go v0.25.4
-	knative.dev/pkg v0.0.0-20230411013349-ef19121ff3df
+	knative.dev/pkg v0.0.0-20230418073056-dfad48eaa5d0
 )
 
 require (
