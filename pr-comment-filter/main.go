@@ -23,6 +23,10 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+const (
+	ORG_NAME = "giantswarm"
+)
+
 var (
 	env map[string]string
 
@@ -63,6 +67,8 @@ func init() {
 		"PREVIOUS_COMMENT": os.Getenv("PREVIOUS_COMMENT"),
 		"COMMENT_ID":       os.Getenv("COMMENT_ID"),
 		"COMMENT_URL":      os.Getenv("COMMENT_URL"),
+		"USER_LOGIN":       os.Getenv("USER_LOGIN"),
+		"USER_TYPE":        os.Getenv("USER_TYPE"),
 	}
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -83,6 +89,11 @@ func main() {
 	fmt.Printf("Filtering PR comments for valid triggers. Repo = %s, PR = %s\n", env["REPO_NAME"], env["NUMBER"])
 
 	ctx := context.Background()
+
+	if !isUserAllowed(ctx, env["USER_LOGIN"], env["USER_TYPE"]) {
+		fmt.Printf("User not permitted to trigger pipelines. User: %s, Type: %s\n", env["USER_LOGIN"], env["USER_TYPE"])
+		return
+	}
 
 	triggerMatches := triggerFormat.FindAllStringSubmatch(os.Getenv("COMMENT"), -1)
 
@@ -270,4 +281,23 @@ func getServiceAccount(ctx context.Context, serviceAccountName string, namespace
 
 func stringToPtr(s string) *string {
 	return &s
+}
+
+func isUserAllowed(ctx context.Context, userLogin, userType string) bool {
+	if strings.ToLower(userType) == "user" && userLogin != "" {
+		oClient := oauth2.NewClient(ctx, oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+		))
+		ghClient := github.NewClient(oClient)
+
+		membership, _, err := ghClient.Organizations.GetOrgMembership(ctx, userLogin, ORG_NAME)
+		if err != nil {
+			fmt.Println("Failed to get org membership from GitHub: ", err)
+			return false
+		}
+
+		return *membership.State == "active"
+	}
+
+	return false
 }
