@@ -758,6 +758,8 @@ knative.dev/pkg v0.0.0-20230418073056-dfad48eaa5d0 h1:EFQcoUo8I4bc+U3y6tR1B3ONYZ
 knative.dev/pkg v0.0.0-20230418073056-dfad48eaa5d0/go.mod h1:2qWPP9Gjh9Q7ETti+WRHnBnGCSCq+6q7m3p/nmUQviE=
 knative.dev/pkg v0.0.0-20230420071539-300df436f953 h1:GAB1JB35FWv5zqypwzmO7v4EPY8xXsomPtHEtb8xdx4=
 knative.dev/pkg v0.0.0-20230420071539-300df436f953/go.mod h1:2qWPP9Gjh9Q7ETti+WRHnBnGCSCq+6q7m3p/nmUQviE=
+knative.dev/pkg v0.0.0-20230501013355-904966742b58 h1:A8F5gaIpL34Zh746M2q7HEI2+wLulYMMNrFuetRwymM=
+knative.dev/pkg v0.0.0-20230501013355-904966742b58/go.mod h1:2qWPP9Gjh9Q7ETti+WRHnBnGCSCq+6q7m3p/nmUQviE=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
 rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=
