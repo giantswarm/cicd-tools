@@ -1,0 +1,13 @@
+{
+    "name": "markdown_to_slack",
+    "version": "0.0.0",
+    "description": "Node.js on Docker",
+    "author": "Giantswarm",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "@tryfabric/mack": "^1.2.1"
+    }
+  }
