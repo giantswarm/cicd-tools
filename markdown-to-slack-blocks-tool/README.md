@@ -2,7 +2,7 @@ This image converts markdown into slack block code .
 
 
 ```
-IMAGE=quay.io/tinkerers-ci:m2b
+IMAGE=quay.io/giantswarm/tinkerers-ci:m2b
 ```
 
 # Build container
