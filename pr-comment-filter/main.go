@@ -141,13 +141,16 @@ func main() {
 		serviceAccountName = serviceAccount.ObjectMeta.Name
 
 		// Support defining a pipeline timeout as an annotation on the Pipeline resource
-		pipelineTimeout, _ := time.ParseDuration("1h")
-		timeoutAnnotation, ok := pipeline.ObjectMeta.Annotations["tekton.dev/pipeline-timeout"]
-		if ok {
-			parsedDuration, err := time.ParseDuration(timeoutAnnotation)
-			if err == nil {
-				pipelineTimeout = parsedDuration
-			}
+		pipelineTimeout, err := time.ParseDuration(getAnnotationOrDefault(pipeline.ObjectMeta.Annotations, "tekton.dev/pipeline-timeout", "1h"))
+		if err != nil {
+			pipelineTimeout, _ = time.ParseDuration("1h")
+		}
+
+		// Support defining the storage class for the pipeline workspace
+		workspaceStorageClass := getAnnotationOrDefault(pipeline.ObjectMeta.Annotations, "cicd.giantswarm.io/storage-class", "efs-sc")
+		workspaceStorageClassAccessMode := corev1.ReadWriteOnce
+		if workspaceStorageClass == "efs-sc" {
+			workspaceStorageClassAccessMode = corev1.ReadWriteMany
 		}
 
 		pipelineRun := &tkn.PipelineRun{
@@ -186,9 +189,9 @@ func main() {
 						Name: "shared",
 						VolumeClaimTemplate: &corev1.PersistentVolumeClaim{
 							Spec: corev1.PersistentVolumeClaimSpec{
-								StorageClassName: stringToPtr("gp3"),
+								StorageClassName: &workspaceStorageClass,
 								AccessModes: []corev1.PersistentVolumeAccessMode{
-									corev1.ReadWriteOnce,
+									workspaceStorageClassAccessMode,
 								},
 								Resources: corev1.ResourceRequirements{
 									Requests: corev1.ResourceList{
@@ -300,4 +303,12 @@ func isUserAllowed(ctx context.Context, userLogin, userType string) bool {
 	}
 
 	return false
+}
+
+func getAnnotationOrDefault(annotations map[string]string, targetKey string, defaultValue string) string {
+	val, ok := annotations[targetKey]
+	if ok {
+		return val
+	}
+	return defaultValue
 }
