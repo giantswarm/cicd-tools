@@ -8,7 +8,7 @@ RUN npm install @tryfabric/mack
 RUN npm ci --omit=dev
 
 # Bundle app source
-COPY . .
+COPY server.js ./
 
 EXPOSE 8080
 CMD [ "node", "server.js" ]
