@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/google/go-github/v50 v50.2.0
 	github.com/google/go-github/v52 v52.0.0
+	github.com/google/go-github/v53 v53.0.0
 	github.com/tektoncd/pipeline v0.45.0
 	golang.org/x/oauth2 v0.8.0
 	k8s.io/api v0.26.5
@@ -21,7 +22,7 @@ require (
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/cloudflare/circl v1.1.0 // indirect
+	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
