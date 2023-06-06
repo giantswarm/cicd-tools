@@ -12,7 +12,7 @@ async function run() {
     }
     return b;
   })
-  console.log(blocks);
+  console.log(JSON.stringify(blocks));
 }
 
 run();
