@@ -4,13 +4,13 @@ go 1.19
 
 require (
 	github.com/google/go-github/v50 v50.2.0
-	github.com/google/go-github/v53 v53.0.0
+	github.com/google/go-github/v53 v53.1.0
 	github.com/tektoncd/pipeline v0.48.0
 	golang.org/x/oauth2 v0.8.0
 	k8s.io/api v0.26.5
 	k8s.io/apimachinery v0.26.5
 	k8s.io/client-go v0.26.5
-	knative.dev/pkg v0.0.0-20230606013829-94b81fcefb58
+	knative.dev/pkg v0.0.0-20230612155445-74c4be5e935e
 )
 
 require (
