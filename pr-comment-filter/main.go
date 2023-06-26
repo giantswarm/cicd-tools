@@ -205,19 +205,13 @@ func main() {
 			},
 		}
 
-		// Populate params with PR details
-		for key, val := range env {
-			pipelineRun.Spec.Params = append(pipelineRun.Spec.Params, tkn.Param{
-				Name: key,
-				Value: tkn.ParamValue{
-					Type:      tkn.ParamTypeString,
-					StringVal: val,
-				},
-			})
+		// Copy Args over to `env` object for populating params
+		for key, val := range trigger.Args {
+			env[key] = val
 		}
 
-		// Populate params with trigger args
-		for key, val := range trigger.Args {
+		// Populate params with PR details
+		for key, val := range env {
 			pipelineRun.Spec.Params = append(pipelineRun.Spec.Params, tkn.Param{
 				Name: key,
 				Value: tkn.ParamValue{
