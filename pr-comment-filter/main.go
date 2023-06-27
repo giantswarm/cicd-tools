@@ -15,7 +15,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v53/github"
 	"golang.org/x/oauth2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -118,18 +118,11 @@ func main() {
 	for _, match := range triggerMatches {
 		trigger := parseTriggerLine(match)
 
-		namespace := "tekton-pipelines"
-		if val, ok := trigger.Args["NAMESPACE"]; ok && val != "" {
-			namespace = trigger.Args["NAMESPACE"]
-		}
-
-		// Check if we can find the pipeline in the cluster
-		pipeline, err := getPipeline(ctx, trigger.PipelineName, namespace)
+		pipeline, namespace, err := getPipeline(ctx, trigger.PipelineName, trigger.Args["NAMESPACE"], env["REPO_NAME"], "tekton-pipelines")
 		if err != nil {
 			fmt.Printf("Failed to find pipeline '%s', skipping\n", trigger.PipelineName)
 			continue
 		}
-		namespace = pipeline.ObjectMeta.Namespace
 
 		// Check if we can find an appropriately named ServiceAccount or fallback to using `default`
 		serviceAccountName := trigger.PipelineName
@@ -254,15 +247,32 @@ func parseTriggerLine(triggerLine []string) Trigger {
 	return trigger
 }
 
-func getPipeline(ctx context.Context, pipelineName string, namespace string) (*tkn.Pipeline, error) {
-	pipeline, err := tektonClient.TektonV1().Pipelines(namespace).Get(ctx, pipelineName, v1.GetOptions{})
-	if err != nil && !errors.IsNotFound(err) {
-		return pipeline, err
-	} else if errors.IsNotFound(err) && namespace != "tekton-pipelines" {
-		pipeline, err = getPipeline(ctx, pipelineName, "tekton-pipelines")
+func getPipeline(ctx context.Context, pipelineName string, userProvidedNamespace string, repoNamespace string, defaultNamespace string) (*tkn.Pipeline, string, error) {
+	// If the user has provided a namespace to use we need to ensure the pipeline is found in that namespace otherwise error
+	if userProvidedNamespace != "" {
+		pipeline, err := tektonClient.TektonV1().Pipelines(userProvidedNamespace).Get(ctx, pipelineName, v1.GetOptions{})
+		if pipeline != nil {
+			return pipeline, userProvidedNamespace, nil
+		} else if errors.IsNotFound(err) {
+			return nil, "", fmt.Errorf("Pipeline not found in user provided namespace")
+		}
 	}
 
-	return pipeline, err
+	// Check if a pipeline exists in a namespace matching the repo, if not finally check the default namespace
+	for _, namespace := range []string{repoNamespace, defaultNamespace} {
+		if namespace == "" {
+			continue
+		}
+
+		pipeline, err := tektonClient.TektonV1().Pipelines(namespace).Get(ctx, pipelineName, v1.GetOptions{})
+		if pipeline != nil {
+			return pipeline, namespace, nil
+		} else if errors.IsNotFound(err) {
+			continue
+		}
+	}
+
+	return nil, "", fmt.Errorf("Pipeline with name '%s' not found", pipelineName)
 }
 
 func getServiceAccount(ctx context.Context, serviceAccountName string, namespace string) (*corev1.ServiceAccount, error) {
