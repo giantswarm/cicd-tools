@@ -28,3 +28,5 @@ Some notes:
 * Arguments are optional and in the format of `KEY=value` where the key must be all uppercase
 * Multiple arguments can be provided as long as they all appear on the same line as the trigger
 * Argument values with spaces in them is not currently supported
+* A Pipeline from a specific namespace can be run by specifying a `NAMESPACE=xxx` argument along with the `/run` trigger line
+* If a user provided namespace isn't provided the pipeline will first be looked for in a namespace matching the repo name and if not found then default back to the `tekton-pipelines` namespace.
