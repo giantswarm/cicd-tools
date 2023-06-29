@@ -35,7 +35,9 @@ var (
 	// /run test-cluster-create PRIVATE_NETWORK=true
 	// /run test-cluster-create PREVIOUS_VERSION=1.2.6
 	// /run test-cluster-upgrade PRIVATE_NETWORK=false PREVIOUS_VERSION=1.2.6
-	triggerFormat = regexp.MustCompile(`(?mi)^\/run (?P<pipeline>\S+) ?(?P<args>(?:[A-Z_]+=\S+ ?)*)(\r|\n|$)`)
+	// /run hold wait-for-tests
+	// /run help NAMESPACE=foo-bar test-cluster-create
+	triggerFormat = regexp.MustCompile(`(?mi)^\/run (?P<pipeline>\S+)(?: (?P<args>(?:[A-Z_]+=\S+ ?)*)| (?P<pos>(?:[A-Za-z0-9\-_]+ ?)*))*(?:\r|\n|$)`)
 
 	tektonClient *tknclient.Clientset
 	kubeClient   kubernetes.Interface
@@ -45,6 +47,7 @@ type Trigger struct {
 	FullTrigger  string
 	PipelineName string
 	Args         map[string]string
+	PosArgs      []string
 }
 
 func init() {
@@ -202,6 +205,10 @@ func main() {
 		for key, val := range trigger.Args {
 			env[key] = val
 		}
+		// If positional args are provided, add them as a `POS_ARGS` env var with a comma seperated value
+		if len(trigger.PosArgs) > 0 {
+			env["POS_ARGS"] = strings.Join(trigger.PosArgs, ",")
+		}
 
 		// Populate params with PR details
 		for key, val := range env {
@@ -234,13 +241,18 @@ func parseTriggerLine(triggerLine []string) Trigger {
 		FullTrigger:  triggerLine[0],
 		PipelineName: triggerLine[1],
 		Args:         map[string]string{},
+		PosArgs:      []string{},
 	}
 
-	args := strings.TrimSpace(triggerLine[2])
+	args := strings.TrimSpace(strings.Join(triggerLine[2:4], " "))
 	for _, arg := range strings.Split(args, " ") {
 		if arg != "" {
-			parts := strings.SplitN(arg, "=", 2)
-			trigger.Args[parts[0]] = parts[1]
+			if strings.Contains(arg, "=") {
+				parts := strings.SplitN(arg, "=", 2)
+				trigger.Args[parts[0]] = parts[1]
+			} else {
+				trigger.PosArgs = append(trigger.PosArgs, arg)
+			}
 		}
 	}
 
