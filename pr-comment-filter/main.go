@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
@@ -70,10 +71,21 @@ func init() {
 		"USER_LOGIN":       os.Getenv("USER_LOGIN"),
 		"USER_TYPE":        os.Getenv("USER_TYPE"),
 	}
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		panic(err)
+
+	var err error
+	var config *rest.Config
+	if kubeconfig := os.Getenv("KUBECONFIG"); kubeconfig != "" {
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			panic(err)
+		}
 	}
+
 	tektonClient, err = tknclient.NewForConfig(config)
 	if err != nil {
 		panic(err)
@@ -123,6 +135,7 @@ func main() {
 			fmt.Printf("Failed to find pipeline '%s', skipping\n", trigger.PipelineName)
 			continue
 		}
+		fmt.Printf("Found Pipeline '%s' in namespace '%s'\n", pipeline.ObjectMeta.Name, namespace)
 
 		// Check if we can find an appropriately named ServiceAccount or fallback to using `default`
 		serviceAccountName := trigger.PipelineName
@@ -132,12 +145,14 @@ func main() {
 			continue
 		}
 		serviceAccountName = serviceAccount.ObjectMeta.Name
+		fmt.Printf("Using ServiceAccount '%s' in namespace '%s'\n", serviceAccountName, namespace)
 
 		// Support defining a pipeline timeout as an annotation on the Pipeline resource
 		pipelineTimeout, err := time.ParseDuration(getAnnotationOrDefault(pipeline.ObjectMeta.Annotations, "tekton.dev/pipeline-timeout", "1h"))
 		if err != nil {
 			pipelineTimeout, _ = time.ParseDuration("1h")
 		}
+		fmt.Printf("Setting Pipeline timeout to: %v\n", pipelineTimeout)
 
 		// Support defining the storage class for the pipeline workspace
 		workspaceStorageClass := getAnnotationOrDefault(pipeline.ObjectMeta.Annotations, "cicd.giantswarm.io/storage-class", "efs-sc")
@@ -145,6 +160,7 @@ func main() {
 		if workspaceStorageClass == "efs-sc" {
 			workspaceStorageClassAccessMode = corev1.ReadWriteMany
 		}
+		fmt.Printf("Setting workspace storage class to: %s\n", workspaceStorageClass)
 
 		pipelineRun := &tkn.PipelineRun{
 			ObjectMeta: v1.ObjectMeta{
@@ -265,10 +281,12 @@ func getPipeline(ctx context.Context, pipelineName string, userProvidedNamespace
 		}
 
 		pipeline, err := tektonClient.TektonV1().Pipelines(namespace).Get(ctx, pipelineName, v1.GetOptions{})
-		if pipeline != nil {
-			return pipeline, namespace, nil
-		} else if errors.IsNotFound(err) {
+		if errors.IsNotFound(err) {
 			continue
+		} else if err == nil {
+			return pipeline, namespace, nil
+		} else if err != nil {
+			return nil, "", err
 		}
 	}
 
