@@ -289,29 +289,29 @@ func main() {
 			tkn.Param{
 				Name: "PR_FILES",
 				Value: tkn.ParamValue{
-					Type:     tkn.ParamTypeArray,
-					ArrayVal: changedFiles.AllFiles(),
+					Type:      tkn.ParamTypeString,
+					StringVal: strings.Join(changedFiles.AllFiles(), ","),
 				},
 			},
 			tkn.Param{
 				Name: "PR_FILES_ADDED",
 				Value: tkn.ParamValue{
-					Type:     tkn.ParamTypeArray,
-					ArrayVal: changedFiles.Added,
+					Type:      tkn.ParamTypeString,
+					StringVal: strings.Join(changedFiles.Added, ","),
 				},
 			},
 			tkn.Param{
 				Name: "PR_FILES_CHANGED",
 				Value: tkn.ParamValue{
-					Type:     tkn.ParamTypeArray,
-					ArrayVal: changedFiles.Changed,
+					Type:      tkn.ParamTypeString,
+					StringVal: strings.Join(changedFiles.Changed, ","),
 				},
 			},
 			tkn.Param{
 				Name: "PR_FILES_REMOVED",
 				Value: tkn.ParamValue{
-					Type:     tkn.ParamTypeArray,
-					ArrayVal: changedFiles.Removed,
+					Type:      tkn.ParamTypeString,
+					StringVal: strings.Join(changedFiles.Removed, ","),
 				},
 			},
 		)

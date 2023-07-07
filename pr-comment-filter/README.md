@@ -4,7 +4,7 @@ Designed to be an entrypoint task for GitHub webhook triggers based on PR commen
 
 The generated `PipelineRun` will have details about the PR passed through as params as well as any arguments added to the trigger comment.
 
-Details about files updated in the PR will also be included as parameters on the `PipelineRun` with the following params being defined with a StringArray value:
+Details about files updated in the PR will also be included as parameters on the `PipelineRun` with the following params being defined with a comma separated string value:
 
 * `PR_FILES` - Includes all files contained in the PR
 * `PR_FILES_ADDED` - Includes all new files
