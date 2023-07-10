@@ -165,11 +165,7 @@ func main() {
 				changedFiles.Added = append(changedFiles.Added, *file.Filename)
 			case "removed":
 				changedFiles.Removed = append(changedFiles.Removed, *file.Filename)
-			case "modified":
-				changedFiles.Changed = append(changedFiles.Changed, *file.Filename)
-			case "renamed":
-				changedFiles.Changed = append(changedFiles.Changed, *file.Filename)
-			case "changed":
+			case "modified", "renamed", "changed":
 				changedFiles.Changed = append(changedFiles.Changed, *file.Filename)
 			default:
 				// Nothing to do here. This includes the `copied` and `unchanged` statuses.
