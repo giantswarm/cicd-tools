@@ -29,7 +29,8 @@ const (
 )
 
 var (
-	env map[string]string
+	env          map[string]string
+	changedFiles ChangedFiles
 
 	// Examples:
 	// /run build-and-publish
@@ -43,6 +44,20 @@ var (
 	tektonClient *tknclient.Clientset
 	kubeClient   kubernetes.Interface
 )
+
+type ChangedFiles struct {
+	Added   []string
+	Removed []string
+	Changed []string
+}
+
+func (c *ChangedFiles) AllFiles() []string {
+	allFiles := []string{}
+	allFiles = append(allFiles, c.Added...)
+	allFiles = append(allFiles, c.Changed...)
+	allFiles = append(allFiles, c.Removed...)
+	return allFiles
+}
 
 type Trigger struct {
 	FullTrigger  string
@@ -73,6 +88,12 @@ func init() {
 		"COMMENT_URL":      os.Getenv("COMMENT_URL"),
 		"USER_LOGIN":       os.Getenv("USER_LOGIN"),
 		"USER_TYPE":        os.Getenv("USER_TYPE"),
+	}
+
+	changedFiles = ChangedFiles{
+		Added:   []string{},
+		Removed: []string{},
+		Changed: []string{},
 	}
 
 	var err error
@@ -122,12 +143,38 @@ func main() {
 		if err != nil {
 			panic("Failed to parse PR number to int")
 		}
+
+		// Get pull request HEAD commit
 		pr, _, err := ghClient.PullRequests.Get(ctx, env["REPO_ORG"], env["REPO_NAME"], prNumber)
 		if err != nil {
 			fmt.Println("Failed to get PR details from GitHub API", err)
 			os.Exit(1)
 		}
 		env["GIT_REVISION"] = *pr.Head.SHA
+
+		// Get changed files
+		// TODO: Currently doesn't handle paging so limited to first 100 files but I'd like to refactor more before we introducing paging support
+		files, _, err := ghClient.PullRequests.ListFiles(ctx, env["REPO_ORG"], env["REPO_NAME"], prNumber, &github.ListOptions{PerPage: 100})
+		if err != nil {
+			fmt.Println("Failed to get changed files in PR from GitHub API", err)
+			os.Exit(1)
+		}
+		for _, file := range files {
+			switch *file.Status {
+			case "added":
+				changedFiles.Added = append(changedFiles.Added, *file.Filename)
+			case "removed":
+				changedFiles.Removed = append(changedFiles.Removed, *file.Filename)
+			case "modified":
+				changedFiles.Changed = append(changedFiles.Changed, *file.Filename)
+			case "renamed":
+				changedFiles.Changed = append(changedFiles.Changed, *file.Filename)
+			case "changed":
+				changedFiles.Changed = append(changedFiles.Changed, *file.Filename)
+			default:
+				// Nothing to do here. This includes the `copied` and `unchanged` statuses.
+			}
+		}
 	}
 
 	for _, match := range triggerMatches {
@@ -236,6 +283,38 @@ func main() {
 				},
 			})
 		}
+
+		// Add changed files as params
+		pipelineRun.Spec.Params = append(pipelineRun.Spec.Params,
+			tkn.Param{
+				Name: "PR_FILES",
+				Value: tkn.ParamValue{
+					Type:      tkn.ParamTypeString,
+					StringVal: strings.Join(changedFiles.AllFiles(), ","),
+				},
+			},
+			tkn.Param{
+				Name: "PR_FILES_ADDED",
+				Value: tkn.ParamValue{
+					Type:      tkn.ParamTypeString,
+					StringVal: strings.Join(changedFiles.Added, ","),
+				},
+			},
+			tkn.Param{
+				Name: "PR_FILES_CHANGED",
+				Value: tkn.ParamValue{
+					Type:      tkn.ParamTypeString,
+					StringVal: strings.Join(changedFiles.Changed, ","),
+				},
+			},
+			tkn.Param{
+				Name: "PR_FILES_REMOVED",
+				Value: tkn.ParamValue{
+					Type:      tkn.ParamTypeString,
+					StringVal: strings.Join(changedFiles.Removed, ","),
+				},
+			},
+		)
 
 		fmt.Printf("Creating new PipelineRun - %s\n", trigger.PipelineName)
 
