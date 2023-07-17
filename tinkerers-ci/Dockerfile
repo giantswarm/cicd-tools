@@ -2,8 +2,11 @@
 ARG KUBECTL_GS_VERSION=2.39.0
 # repo: giantswarm/opsctl
 ARG OPSCTL_VERSION=3.3.0
+# repo: vmware-tanzu/sonobuoy
+ARG SONOBUOY_VERSION=v0.56.16
 FROM quay.io/giantswarm/kubectl-gs:${KUBECTL_GS_VERSION} AS kubectl-gs
 FROM quay.io/giantswarm/opsctl:${OPSCTL_VERSION} AS opsctl
+FROM docker.io/sonobuoy/sonobuoy:${SONOBUOY_VERSION} AS sonobuoy
 
 FROM ubuntu:latest
 
@@ -32,6 +35,9 @@ COPY --from=kubectl-gs /usr/bin/kubectl-gs /usr/bin/kubectl-gs
 
 # opsctl
 COPY --from=opsctl /usr/local/bin/opsctl /usr/local/bin/opsctl
+
+# sonobuoy
+COPY --from=sonobuoy /sonobuoy /usr/local/bin/sonobuoy
 
 # vcluster
 ARG VCLUSTER_VERSION=
