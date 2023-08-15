@@ -323,6 +323,8 @@ github.com/tektoncd/pipeline v0.49.0 h1:LxpgoPZvIDiOvPj6vtInnGG0uzuQ5CPA+h8FdJdk
 github.com/tektoncd/pipeline v0.49.0/go.mod h1:R3Qn/oTTf1SCLrj+rCg4sqUbpx7vE+6D8Z81+zKUdqQ=
 github.com/tektoncd/pipeline v0.50.0 h1:bH04XChFOYCwr7Gm6f2NiDkieHUiGohKCGsLe0fxYf0=
 github.com/tektoncd/pipeline v0.50.0/go.mod h1:OjhCfhPQbVvK6GUmIseL2ipjaQ8ILcUerMk4P4sCcHA=
+github.com/tektoncd/pipeline v0.50.1 h1:Asdfn1MxUSTlfzmr0PV4BPIEH7K4QLGym33nLgQlPCQ=
+github.com/tektoncd/pipeline v0.50.1/go.mod h1:OjhCfhPQbVvK6GUmIseL2ipjaQ8ILcUerMk4P4sCcHA=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=
 github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415/go.mod h1:GwrjFmJcFw6At/Gs6z4yjiIwzuJ1/+UwLxMQDVQXShQ=
 github.com/xeipuuv/gojsonschema v1.2.0/go.mod h1:anYRn/JVcOK2ZgGU+IjEV4nwlhoK5sQluxsYJ78Id3Y=
