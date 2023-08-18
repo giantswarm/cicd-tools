@@ -21,6 +21,6 @@
       "extractVersionTemplate": "^(?<version>.*)$"
     }
   ],
-  "schedule": [ "after 6am on tuesday" ],
+  "schedule": [ "at any time" ],
   "ansible": { "enabled": false }
 }
