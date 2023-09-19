@@ -68,6 +68,14 @@ RUN YQ_VERSION=${YQ_VERSION:=$(curl -s "https://api.github.com/repos/mikefarah/y
     mv yq_linux_amd64 /usr/local/bin/yq && \
     chmod +x /usr/local/bin/yq
 
+# envsubst
+# repo: a8m/envsubst
+ARG ENVSUBST_VERSION=v1.4.2
+RUN ENVSUBST_VERSION=${ENVSUBST_VERSION:=$(curl -s "https://api.github.com/repos/a8m/envsubst/releases/latest" | jq -r '.tag_name')} &&\
+    curl -fsL -O "https://github.com/a8m/envsubst/releases/download/${ENVSUBST_VERSION}/envsubst-Linux-x86_64" && \
+    mv envsubst-Linux-x86_64 /usr/local/bin/envsubst && \
+    chmod +x /usr/local/bin/envsubst
+
 RUN mkdir /scripts
 
 COPY scripts /scripts
