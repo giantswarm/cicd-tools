@@ -25,7 +25,8 @@ import (
 )
 
 const (
-	ORG_NAME = "giantswarm"
+	ORG_NAME             = "giantswarm"
+	RENOVATE_BOT_USER_UD = "29139614"
 )
 
 var (
@@ -88,6 +89,7 @@ func init() {
 		"COMMENT_URL":      os.Getenv("COMMENT_URL"),
 		"USER_LOGIN":       os.Getenv("USER_LOGIN"),
 		"USER_TYPE":        os.Getenv("USER_TYPE"),
+		"USER_ID":          os.Getenv("USER_ID"),
 	}
 
 	changedFiles = ChangedFiles{
@@ -126,8 +128,8 @@ func main() {
 
 	ctx := context.Background()
 
-	if !isUserAllowed(ctx, env["USER_LOGIN"], env["USER_TYPE"]) {
-		fmt.Printf("User not permitted to trigger pipelines. User: %s, Type: %s\n", env["USER_LOGIN"], env["USER_TYPE"])
+	if !isUserAllowed(ctx, env["USER_LOGIN"], env["USER_ID"], env["USER_TYPE"]) {
+		fmt.Printf("User not permitted to trigger pipelines. User: %s, ID: %s, Type: %s\n", env["USER_LOGIN"], env["USER_ID"], env["USER_TYPE"])
 		return
 	}
 
@@ -395,7 +397,7 @@ func stringToPtr(s string) *string {
 	return &s
 }
 
-func isUserAllowed(ctx context.Context, userLogin, userType string) bool {
+func isUserAllowed(ctx context.Context, userLogin, userID, userType string) bool {
 	if strings.ToLower(userType) == "user" && userLogin != "" {
 		oClient := oauth2.NewClient(ctx, oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
@@ -409,6 +411,9 @@ func isUserAllowed(ctx context.Context, userLogin, userType string) bool {
 		}
 
 		return *membership.State == "active"
+	} else if strings.ToLower(userType) == "bot" && userID == RENOVATE_BOT_USER_UD {
+		fmt.Println("Allowing Renovate bot to trigger pipeline")
+		return true
 	}
 
 	return false
