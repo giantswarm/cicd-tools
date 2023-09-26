@@ -25,8 +25,7 @@ import (
 )
 
 const (
-	ORG_NAME             = "giantswarm"
-	RENOVATE_BOT_USER_UD = "29139614"
+	ORG_NAME = "giantswarm"
 )
 
 var (
@@ -44,6 +43,8 @@ var (
 
 	tektonClient *tknclient.Clientset
 	kubeClient   kubernetes.Interface
+
+	renovateBotUserID string
 )
 
 type ChangedFiles struct {
@@ -71,6 +72,11 @@ func init() {
 	if os.Getenv("COMMENT") == "" {
 		fmt.Println("No comment provided")
 		os.Exit(0)
+	}
+
+	renovateBotUserID = os.Getenv("RENOVATE_BOT_USER_ID")
+	if renovateBotUserID == "" {
+		renovateBotUserID = "29139614"
 	}
 
 	env = map[string]string{
@@ -411,7 +417,7 @@ func isUserAllowed(ctx context.Context, userLogin, userID, userType string) bool
 		}
 
 		return *membership.State == "active"
-	} else if strings.ToLower(userType) == "bot" && userID == RENOVATE_BOT_USER_UD {
+	} else if strings.ToLower(userType) == "bot" && userID == renovateBotUserID {
 		fmt.Println("Allowing Renovate bot to trigger pipeline")
 		return true
 	}
