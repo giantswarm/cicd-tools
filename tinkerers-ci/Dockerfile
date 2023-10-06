@@ -1,5 +1,5 @@
 # repo: giantswarm/kubectl-gs
-ARG KUBECTL_GS_VERSION=2.41.1
+ARG KUBECTL_GS_VERSION=2.42.0
 # repo: giantswarm/opsctl
 ARG OPSCTL_VERSION=3.3.0
 # repo: vmware-tanzu/sonobuoy
